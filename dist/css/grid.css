@@ -1,0 +1,129 @@
+﻿* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.grid {
+    font-size: 14px;
+}
+
+    .grid table {
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .grid tr {
+        height: 35px;
+        line-height: 35px;
+    }
+
+.grid-header {
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+.grid-header-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.grid-header-scrollbar::-webkit-scrollbar {
+    visibility: hidden;
+}
+
+.grid-header > table, .grid-body > table {
+    width: 100%;
+    background-color: #f9f9f9;
+}
+
+.grid-header th {
+    border: 1px solid #e9e9e9;
+    border-collapse: collapse;
+}
+
+.grid-body {
+    overflow-y: scroll;
+}
+
+    .grid-body tr {
+        height: 35px;
+    }
+
+        .grid-body tr:hover {
+            background-color: #F7E5A7 !important;
+        }
+
+        .grid-body tr:nth-child(2n+1) {
+            background-color: #fcfcfc;
+        }
+
+        .grid-body tr:nth-child(2n) {
+            background-color: #fff;
+        }
+
+        .grid-body tr:nth-child(1) > td {
+            border-top: 0;
+        }
+
+    .grid-body td {
+        text-align: center;
+        overflow: hidden;
+        border: 1px solid #f3f3f3;
+    }
+
+        .grid-body td > div {
+            height: 35px;
+            overflow: hidden;
+        }
+
+.grid-footer {
+    height: 35px;
+}
+
+    .grid-footer > div {
+        height: 35px;
+    }
+
+        .grid-footer > div select {
+            height: 26px;
+            line-height: 26px;
+            margin-top: 5px;
+            margin-right: 7px;
+            width: 50px;
+        }
+
+.page-first, .page-prev, .page-next, .page-last {
+    padding: 5px;
+    padding-left: 20px;
+    background-position: center center;
+    background-repeat: no-repeat;
+    border: 1px solid transparent;
+}
+
+    .page-first:hover, .page-prev:hover, .page-next:hover, .page-last:hover {
+        border: 1px solid #ccc;
+    }
+
+.page-first {
+    background-image: url(../img/first.png);
+}
+
+.page-prev {
+    background-image: url(../img/prev.png);
+}
+
+.page-next {
+    background-image: url(../img/next.png);
+}
+
+.page-last {
+    background-image: url(../img/last.png);
+}
+
+.grid-footer .separator {
+    height: 22px;
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #fff;
+    margin: 1px;
+}
