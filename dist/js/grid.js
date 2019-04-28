@@ -97,8 +97,23 @@
                         case "lab":
                             {
                                 var tdtext, titleTxt, canHide;
+                                var b = true;//是否显示内容
+                                if (tdconf.isHideKey != undefined) {
+                                    b = !item[tdconf.isHideKey];
+                                }
+                                if (!b) continue;
+                                if (this.isEdit && tdconf.edit) {
+                                    canHide = true;
+                                } else { canHide = false }
                                 if (typeof (tdconf.formatter) == "function") {
                                     tdtext = tdconf.formatter(item, tdconf);
+                                } else if (canHide && tdconf.edit.type == "select") {
+                                    for (var h = 0; h < tdconf.edit.options.length; h++) {
+                                        if (tdconf.edit.options[h].value == item[tdconf.name]) {
+                                            tdtext = tdconf.edit.options[h].text;
+                                            break;
+                                        }
+                                    }
                                 } else {
                                     tdtext = item[tdconf.name];
                                 }
@@ -115,77 +130,52 @@
                                         tdtext = (tdtext || "").substr(0, tdconf.cutLen) + "...";
                                     }
                                 }
-                                if (this.isEdit && tdconf.canEdit) {
-                                    canHide = true;
-                                }
                                 if (tdconf.click) {
                                     var a = $('<a href="javascript:void(0);"></a>').appendTo(div);
-                                    a.html(tdtext).attr("title", "titleTxt");
+                                    a.html(tdtext).attr("data-name", tdconf.name).attr("data-value", item[tdconf.name]).attr("title", "titleTxt");
                                     a.click((function (tdconf, tdtext, item) {
                                         return function () {
-                                            tdconf.click.apply(this, tdtext, item);
+                                            tdconf.click.apply(this, [tdtext, item]);
                                         }
                                     })(tdconf, tdtext, item));
                                     if (canHide) {
                                         a.attr("canHide", "true");
                                     }
                                 } else {
-                                    var span = $('<span"></span>').appendTo(div);
-                                    span.html(tdtext).attr("title", titleTxt);
+                                    var span = $('<span></span>').appendTo(div);
+                                    span.html(tdtext).attr("data-name", tdconf.name).attr("data-value", item[tdconf.name]).attr("title", titleTxt);
                                     if (canHide) {
                                         span.attr("canHide", "true");
                                     }
                                 }
-                                if (this.isEdit && tdconf.canEdit) {
-                                    var input = $('<input style="display:none" dataName="' + tdconf.name + '" />').appendTo(div);
-                                    input.val(tdtext);
+                                if (canHide) {
+                                    var _type = tdconf.edit.type || "text";
+                                    var input;
+                                    if (_type == "text") {
+                                        input = $('<input style="display:none" dataName="' + tdconf.name + '" />').appendTo(div);
+                                        input.val(tdtext);
+                                    } else if (_type == "select") {
+                                        if (!tdconf.edit.options) throw new Error("当单元格编辑类型为下拉框时必须指定options参数!");
+                                        var str = '<select style="display:none">';
+                                        if (tdconf.edit.nullable) {
+                                            str += '<option value="">--请选择--</option>';
+                                        }
+                                        for (var h = 0; h < tdconf.edit.options.length; h++) {
+                                            str += '<option value="' + tdconf.edit.options[h].value + '">' + tdconf.edit.options[h].text + '</option>';
+                                        }
+                                        str += "</select>";
+                                        input = $(str).appendTo(div);
+                                        input.val(tdtext);
+                                    }
+                                    if (tdconf.edit.attr) {
+                                        for (var m in tdconf.edit.attr) {
+                                            input.attr(m, tdconf.edit.attr[m]);
+                                        }
+                                    }
+                                    td.attr("data-edit", "true");
                                 }
                                 break;
                             }
-                        case "btn": {
-                            var b = true;
-                            //使用隐藏键控制按钮生成
-                            if (tdconf.isHideKey != undefined) {
-                                if (item[tdconf.isHideKey]) {
-
-                                } else {
-                                    b = false;
-                                }
-                            }
-                            if (b) {
-                                var tdtext, titleTxt, canHide;
-                                if (typeof (tdconf.formatter) == "function") {
-                                    tdtext = tdconf.formatter(item, tdconf);
-                                } else {
-                                    tdtext = item[tdconf.name];
-                                }
-                                if (tdconf.title) {//动态的ttitle
-                                    titleTxt = item[tdconf.title];
-                                }
-                                if (tdconf.titleText) {//强制的title,优先级高
-                                    titleTxt = tdconf.titleText;
-                                }
-                                if (tdconf.text) {//对于按钮来说text属性优先级高于name属性
-                                    tdtext = td.text;//按钮文本
-                                }
-                                //内容超过最大长度截取
-                                if (tdconf.cutLen != undefined) {
-                                    tdtext = tdtext || "";
-                                    if (tdtext.length > tdconf.cutLen) {
-                                        tdtext = (tdtext || "").substr(0, tdconf.cutLen) + "...";
-                                    }
-                                }
-                                var a = $("<a href='javascript:void(0)'></a>").appendTo(div);
-                                a.attr("title", titleTxt);
-                                a.html(tdtext);
-                                a.click((function (tdconf, tdtext, item) {
-                                    return function () {
-                                        tdconf.click.apply(this, [tdtext, item]);
-                                    }
-                                })(tdconf, tdtext, item));
-                                break;
-                            }
-                        }
                         case "img": {
                             //首先处理格式化图片地址函数
                             var srcpath = item[tdconf.src];
@@ -242,21 +232,13 @@
                             var a_edit = $("<a href='javascript:void(0)' btnFlag='__edit'>编辑</a>").appendTo(div);
                             div.append("&nbsp;&nbsp;");
                             var a_delete = $("<a href='javascript:void(0)' btnFlag='__delete'>删除</a>").appendTo(div);
-                            var a_update = $("<a href='javascript:void(0)' btnFlag='__update'>更新</a>").appendTo(div);
+                            var a_update = $("<a href='javascript:void(0)' btnFlag='__update'>更新</a>").hide().appendTo(div);
                             div.append("&nbsp;&nbsp;");
-                            var a_cancel = $("<a href='javascript:void(0)' btnFlag='__cancel'>取消</a>").appendTo(div);
-                            a_edit.click((function (item, rowIndex) {
-                                return function () {
-                                    var rowIndex = $(item).attr("rowIndex");
-                                    var tds = $("td[rowIndex=" + rowIndex + "]");
-                                    tds.find("span[canHide=true],a[canHide=true]").hide();
-                                    tds.find("input").show();
-                                    tds.find("a[btnFlag=__edit]").hide();
-                                    tds.find("a[btnFlag=__delete]").hide();
-                                    tds.find("a[btnFlag=__update]").show();
-                                    tds.find("a[btnFlag=__cancel]").show();
-                                }
-                            })(item, rowIndex));
+                            var a_cancel = $("<a href='javascript:void(0)' btnFlag='__cancel'>取消</a>").hide().appendTo(div);
+                            a_edit.click(_this._editClick);
+                            a_delete.click(_this._deleteClick);
+                            a_update.click(_this._updateClick);
+                            a_cancel.click(_this._cancelClick);
                             break;
                         }
                         case "chk": {
@@ -306,6 +288,56 @@
                     }
                 }
             }
+        }
+        this._editClick = function () {
+            var tr = $(this).parentsUntil("tbody", "tr");
+            var tds = tr.children("[data-edit=true]");
+            for (var i = 0; i < tds.length; i++) {
+                var td = tds.eq(i);
+                td.find("span[canHide=true],a[canHide=true]").hide();
+                td.find("input").val(td.find("span[canHide=true],a[canHide=true]").text()).show();
+                td.find("select").val(td.find("span[canHide=true],a[canHide=true]").attr("data-value")).show();
+            }
+            tr.find("a[btnFlag=__edit]").hide();
+            tr.find("a[btnFlag=__delete]").hide();
+            tr.find("a[btnFlag=__update]").show();
+            tr.find("a[btnFlag=__cancel]").show();
+        }
+        this._deleteClick = function () {
+            var tr = $(this).parentsUntil("tbody", "tr");
+            var data = tr.data("rowdata");
+            if (!_this.onDelete) { throw new Error("必须定义onDelete方法!"); }
+            _this.onDelete(data);
+        }
+        this._updateClick = function () {
+            if (!_this.onUpdate) { throw new Error("必须定义onUpdate方法!"); }
+            var tr = $(this).parentsUntil("tbody", "tr");
+            var data = tr.data("rowdata");
+            var updateData = $.extend(true, {}, data);
+            var tds = tr.children("[data-edit=true]");
+            for (var i = 0; i < tds.length; i++) {
+                var td = tds.eq(i);
+                var name = td.find("span").attr("data-name");
+                if (td.find("input").length > 0) {
+                    updateData[name] = td.find("input").val()
+                } else if (td.find("select").length > 0) {
+                    updateData[name] = td.find("select").val()
+                }
+            }
+            _this.onUpdate(updateData);
+        }
+        this._cancelClick = function () {
+            var tr = $(this).parentsUntil("tbody", "tr");
+            var tds = tr.children("[data-edit=true]");
+            for (var i = 0; i < tds.length; i++) {
+                var td = tds.eq(i);
+                td.find("span[canHide=true],a[canHide=true]").show();
+                td.find("input,select").hide();
+            }
+            tr.find("a[btnFlag=__edit]").show();
+            tr.find("a[btnFlag=__delete]").show();
+            tr.find("a[btnFlag=__update]").hide();
+            tr.find("a[btnFlag=__cancel]").hide();
         }
         this._initFooter = function (res) {
             if (this.isPage && this.pageSize > 0) {
