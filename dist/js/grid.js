@@ -395,6 +395,7 @@
             if (srcType != targetType) {
                 data.order.rank = --_this.rank;
                 data.order.type = $(this).attr("data-type");
+                _this.pageIndex = 1;
                 _this.onQuery(_this.pageIndex, _this.pageSize, _this._sortOrders(_this._collectOrders()));
             }
         }
