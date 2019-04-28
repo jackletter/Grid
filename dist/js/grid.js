@@ -57,6 +57,11 @@
         }
         this._initBody = function (res) {
             _this.target_body = $('<div class="grid-body"></div>').appendTo(target);
+            if (_this.isFixHead) {
+                if (!_this.height) throw new Error("固定表格头时必须指定高度!");
+                var hei = _this.height - _this.target_header.height();
+                _this.target_body.css("height", hei + "px");
+            }
             _this.target_body.scroll(function (e) {
                 _this.target_header.scrollLeft(e.target.scrollLeft);
             });
@@ -262,12 +267,13 @@
                             if (tdconf.titleText) {//强制的title,优先级高
                                 titleTxt = tdconf.titleText;
                             }
-                            var chk = $("<input type='checkbox' />").appendTo(div);
+                            var chk = $("<div class='grid-checkbox' />").appendTo(div);
                             chk.attr("title", titleTxt);
                             chk.click((function (tdconf, item) {
                                 return function () {
+                                    $(this).toggleClass("grid-checked");
                                     if (tdconf.selectRow) {
-                                        if ($(this).is(":checked")) {
+                                        if ($(this).hasClass("grid-checked")) {
                                             $(this).parentsUntil("tbody", "tr").addClass("grid-select-row");
                                             if (tdconf.click) {
                                                 tdconf.click.apply(this, [true, item]);
@@ -342,6 +348,15 @@
         }
         this.mergeRow = function () {
 
+        }
+        this.getSelectedRows = function () {
+            var trs = _this.target_body.find("tr.grid-select-row");
+            var data = [];
+            for (var i = 0; i < trs.length; i++)data.push(trs.eq(i).data("rowdata"));
+            return {
+                trs: trs,
+                data: data
+            };
         }
         this._onPageChange = function () {
             var page = $(this).attr("data-page");
@@ -426,6 +441,7 @@
         ele: "grid",//表格空间所在的容器的id
         isPage: true,//是否分页
         isFixHead: false,//是否固定列表头
+        height: 450,
         isEdit: false,//是否可编辑
         mergeKey: "",
         headArr: [],//列表头

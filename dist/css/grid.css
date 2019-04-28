@@ -141,6 +141,7 @@
 .grid-body td>div {
     height: 35px;
     overflow: hidden;
+    position: relative;
 }
 
 .grid-footer {
@@ -215,4 +216,29 @@
     color: #337ab7;
     text-decoration: none;
     background-color: transparent;
+}
+
+.grid-checkbox {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    background-image: url(../img/check.png);
+    background-position: 0 0;
+    background-repeat: no-repeat;
+    top: 50%;
+    left: 50%;
+    margin-top: -8px;
+    margin-left: -8px;
+    position: absolute;
+}
+
+.grid-checkbox.grid-checked {
+    background-image: url(../img/check.png);
+    background-position: -20px 0;
+    background-repeat: no-repeat;
+}
+
+.grid-select-row {
+    background-color: #F7E5A7 !important;
 }
