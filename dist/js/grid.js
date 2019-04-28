@@ -271,20 +271,28 @@
                             })(tdconf, item));
                             break;
                         }
-                        case "index":
-                            {
-                                var ind = i + 1;
-                                if (this.isPage) {
-                                    var base = window.parseInt(this.pageIndex * this.pageCount);
-                                    if (isNaN(base)) {
-                                        console.error("算行号时出错");
-                                    } else {
-                                        ind += base;
-                                    }
+                        case "index": {
+                            var ind = i + 1;
+                            if (this.isPage) {
+                                var base = window.parseInt(this.pageIndex * this.pageCount);
+                                if (isNaN(base)) {
+                                    console.error("算行号时出错");
+                                } else {
+                                    ind += base;
                                 }
-                                $("<span>" + ind + "</span>").appendTo(div);
-                                break;
                             }
+                            $("<span>" + ind + "</span>").appendTo(div);
+                            break;
+                        }
+                        case "other": {
+                            if (!tdconf.formatter) throw new Error("类型为other的列必须指定formmter函数!");
+                            var _res = tdconf.formatter(item, tdconf);
+                            if (typeof (_res) == "string") {
+                                _res = $(_res);
+                            }
+                            div.replaceWith(_res);
+                            break;
+                        }
                     }
                 }
             }
