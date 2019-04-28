@@ -1,5 +1,6 @@
 ﻿<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
+
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>基本测试</title>
@@ -7,6 +8,7 @@
     <script src="../dist/js/jquery-3.3.1.js"></script>
     <script src="../dist/js/grid.js"></script>
 </head>
+
 <body>
     <div id="grid" style="width:800px;"></div>
     <script type="text/javascript">
@@ -47,11 +49,11 @@
                     { type: "lab", name: "ubirth" },
                     { type: "lab", name: "uaddr" }
                 ],
-                initGrid: function () {
-                    grid.init({ DataList: data,Count:520 });
+                onQuery: function (pageIndex, pageSize, orders) {
+                    grid.init({ data: data, count: 520 });
                 }
             });
-            grid.initGrid();
+            grid.init({ data: data, count: 520 });
         });
         var data = [
             { uname: "小明", uage: 20, usex: "男", uprof: "学生", uidentity: "342510199612146325", uplace: "湖南省湘潭县", ubirth: "1996-12-14", uaddr: "湖北省武汉市汤逊湖社区" },
@@ -67,4 +69,5 @@
         ];
     </script>
 </body>
+
 </html>
