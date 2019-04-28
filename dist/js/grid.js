@@ -181,7 +181,7 @@
                             var srcpath = item[tdconf.src];
                             if (typeof (tdconf.formatter) == "function") {
                                 srcpath = tdconf.formatter(item, tdconf);
-                            } else {
+                            } else if (tdconf.name) {
                                 srcpath = item[tdconf.name];
                             }
                             var titleTxt = "";//提示文本
