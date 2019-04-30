@@ -21,7 +21,11 @@
             var colgroup = $('<colgroup></colgroup>').appendTo(table);
             var tmpstr = "";
             for (var i = 0; i < this.colWidths.length; i++) {
-                tmpstr += '<col style="width:' + this.colWidths[i] + 'px;" />\n';
+                if (typeof (this.colWidths[i]) == "string" && this.colWidths[i].indexOf("%") > 0) {
+                    tmpstr += '<col style="width:' + this.colWidths[i] + ';" />\n';
+                } else {
+                    tmpstr += '<col style="width:' + this.colWidths[i] + 'px;" />\n';
+                }
             }
             colgroup.html(tmpstr);
             var tbody = $('<tbody></tbody>').appendTo(table);
@@ -69,7 +73,11 @@
             var colgroup = $('<colgroup></colgroup>').appendTo(table);
             var tmpstr = "";
             for (var i = 0; i < this.colWidths.length; i++) {
-                tmpstr += '<col style="width:' + this.colWidths[i] + 'px;" />\n';
+                if (typeof (this.colWidths[i]) == "string" && this.colWidths[i].indexOf("%") > 0) {
+                    tmpstr += '<col style="width:' + this.colWidths[i] + ';" />\n';
+                } else {
+                    tmpstr += '<col style="width:' + this.colWidths[i] + 'px;" />\n';
+                }
             }
             colgroup.html(tmpstr);
             var tbody = $('<tbody></tbody>').appendTo(table);
