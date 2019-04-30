@@ -1,4 +1,4 @@
-﻿(function (window, $) {
+(function (window, $) {
     var Grid = window.Grid = function (ele, conf) {
         var _this = this;
         var target = this.target = $("#" + ele);
@@ -362,7 +362,7 @@
                     }
                 }
                 tempstr += "</select>";
-                $(tempstr).on("change", this.onPageChange).appendTo(div);
+                $(tempstr).on("change", this._onPageChange).appendTo(div);
                 div.append('<span class="separator"></span>');
                 if (this.pageIndex == 1) {
                     div.append('<span class="page-first page-disabled" data-page="first"></span>');
@@ -421,7 +421,7 @@
                 _this.pageSize = pageSize;
             }
             var orders = _this._sortOrders(_this._collectOrders());
-            _this.onQuery(pageIndex, pageSize, orders);
+            _this.onQuery(_this.pageIndex, _this.pageSize, orders);
         }
         this._onOrder = function (evt) {
             var item = $(this);
