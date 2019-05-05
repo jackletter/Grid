@@ -93,6 +93,18 @@
             for (var i = 0; i < res.data.length; i++) {
                 var item = res.data[i];
                 var tr = $('<tr rowIndex="' + i + '"></tr>').appendTo(tbody);
+                tr.click(function () {
+                    var rowdata = $(this).data("rowdata");
+                    if (typeof (_this.onRowClick) == "function") {
+                        _this.onRowClick(rowdata, this, $(this).attr("rowindex"));
+                    }
+                });
+                tr.dblclick(function () {
+                    var rowdata = $(this).data("rowdata");
+                    if (typeof (_this.onRowDblClick) == "function") {
+                        _this.onRowDblClick(rowdata, this, $(this).attr("rowindex"));
+                    }
+                });
                 tr.data("rowdata", item);
                 if (this.rowContentHeight) {
                     //加行高
@@ -509,6 +521,9 @@
         pageSize: 10,//每页记录数
         pageSizeList: [10, 20, 30, 40, 50],//可选分页大小列表
         pageIndex: 1,//当前页索引
-        onQuery: function () { throw new Error("必须自定义onQuery方法!") }
+        onQuery: function () { throw new Error("必须自定义onQuery方法!") },
+        onRowDblClick: undefined,//行双击事件
+        onRowClick: undefined//行单击事件
+
     };
 })(window, jQuery)
