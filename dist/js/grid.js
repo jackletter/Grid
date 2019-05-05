@@ -383,7 +383,7 @@
                 var input = $('<input type="text" style="width:50px; height:25px; line-height:25px;" value="' + this.pageIndex + '" data-page="direct" />').on('change', this._onPageChange).appendTo(div);
                 div.append('<span style="margin:5px;">页,共' + pageCount + '页</span>');
                 div.append('<span class="separator"></span>');
-                if (this.pageIndex == pageCount) {
+                if (this.pageIndex == pageCount || pageCount == 0) {
                     div.append('<span class="page-next page-disabled" data-page="next"></span>');
                     div.append('<span class="page-last page-disabled" data-page="last"></span>');
                 } else {
