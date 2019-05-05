@@ -81,6 +81,11 @@
             }
             colgroup.html(tmpstr);
             var tbody = $('<tbody></tbody>').appendTo(table);
+            if (res.data.length == 0) {
+                //没有数据时插入提示行
+                var tr = $('<tr class="grid-no-data"><td colspan="' + this.columnArr.length + '">没有数据</td></tr>').appendTo(tbody);
+                return;
+            }
             for (var i = 0; i < res.data.length; i++) {
                 var item = res.data[i];
                 var tr = $('<tr rowIndex="' + i + '"></tr>').appendTo(tbody);

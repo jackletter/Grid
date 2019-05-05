@@ -138,6 +138,16 @@
     border: 1px solid #f3f3f3;
 }
 
+.grid-body tr.grid-no-data {
+    background-color: #fcfcfc !important;
+}
+
+.grid-body tr.grid-no-data td {
+    font-style: italic;
+    padding-left: 20px;
+    text-align: left;
+}
+
 .grid-body td>div {
     height: 35px;
     overflow: hidden;
