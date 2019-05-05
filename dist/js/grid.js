@@ -43,6 +43,8 @@
                     if (this.headArr[i][j].rowspan != undefined) {
                         td.attr("rowspan", this.headArr[i][j].rowspan);
                     }
+                    //赋属性
+                    td.attr(this.headArr[i][j].attr);
                     var div = $('<div>' + this.headArr[i][j].text + '</div>').appendTo(td);
                     //处理排序
                     if (this.headArr[i][j].order) {
@@ -98,8 +100,7 @@
                     //遍历字段
                     var td = $('<td></td>').appendTo(tr);
                     //赋属性
-                    $.extend(td, this.columnArr[j].attr);
-                    //
+                    td.attr(this.columnArr[j].attr);
                     var div = $('<div></div>').appendTo(td);
 
                     var tdconf = this.columnArr[j];
