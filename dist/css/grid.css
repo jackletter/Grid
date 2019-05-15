@@ -266,3 +266,22 @@
     outline: none;
     border: 1px solid #007ACC;
 }
+
+.grid-header th>div {
+    position: relative;
+}
+
+.grid-header .size-handle {
+    cursor: col-resize;
+    position: absolute;
+    right: 0;
+    height: 100%;
+    width: 5px;
+    top: 0;
+}
+
+.grid .grid-size-split {
+    position: absolute;
+    width: 0;
+    border-right: 2px dashed #999;
+}

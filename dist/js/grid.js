@@ -5,27 +5,56 @@
         this.target_header = null;
         this.target_body = null;
         this.target_footer = null;
+        this.target_split = null;
         this.rank = 1;
+        this._widArr = [];//记录计算后的每列宽度
         if (target.length == 0) throw new Error("无效的容器id!");
         $.extend(this, Grid.settings, conf);
         this.init = function (res) {
             target.html("");
             target.addClass("grid");
+            this._initColWid();
             this._initHeader(res);
             this._initBody(res);
             this._initFooter(res);
+            //初始化列宽调整线
+            this.target_split = $("<div class='grid-size-split' />").appendTo(target);
+        }
+        this._initColWid = function () {
+            var wid = this.target.width() - 19;
+            this._widArr = [];
+            var total = 0;
+            for (var i = 0; i < this.colWidths.length; i++) {
+                var _wid = 0;
+                if (typeof (this.colWidths[i]) == "string" && this.colWidths[i].indexOf("%") > 0) {
+                    _wid = wid * window.parseInt(this.colWidths[i]);
+                    _wid = window.parseInt(_wid);
+                } else {
+                    _wid = window.parseInt(this.colWidths[i]);
+                }
+                this._widArr.push(_wid);
+                total += _wid;
+            }
+            if (total == wid) return;
+            var sum = 0;
+            for (var i = 0; i < this._widArr.length; i++) {
+                if (i == this._widArr.length - 1) {
+                    this._widArr[i] = wid - sum;
+                } else {
+                    this._widArr[i] = window.parseInt(this._widArr[i] / total * wid);
+                    sum += this._widArr[i];
+                }
+            }
+
         }
         this._initHeader = function () {
             _this.target_header = $('<div class="grid-header grid-header-scrollbar"></div>').appendTo(target);;
             var table = $('<table></table>').appendTo(_this.target_header);
             var colgroup = $('<colgroup></colgroup>').appendTo(table);
             var tmpstr = "";
-            for (var i = 0; i < this.colWidths.length; i++) {
-                if (typeof (this.colWidths[i]) == "string" && this.colWidths[i].indexOf("%") > 0) {
-                    tmpstr += '<col style="width:' + this.colWidths[i] + ';" />\n';
-                } else {
-                    tmpstr += '<col style="width:' + this.colWidths[i] + 'px;" />\n';
-                }
+            for (var i = 0; i < this._widArr.length; i++) {
+                var _wid = 0;
+                tmpstr += '<col style="width:' + this._widArr[i] + 'px;" />\n';
             }
             colgroup.html(tmpstr);
             var tbody = $('<tbody></tbody>').appendTo(table);
@@ -60,6 +89,10 @@
                         _this.rank = Math.min(this.headArr[i][j].order.rank, _this.rank);
                         icon.click(this._onOrder);
                     }
+                    //处理调整列宽,最后一行表头才可以
+                    if (this.sizeColumn && i == this.headArr.length - 1) {
+                        var size = $("<div class='size-handle' />").appendTo(div).mousedown(this._sizeDown);
+                    }
                 }
             }
         }
@@ -76,12 +109,9 @@
             var table = $('<table></table>').appendTo(_this.target_body);
             var colgroup = $('<colgroup></colgroup>').appendTo(table);
             var tmpstr = "";
-            for (var i = 0; i < this.colWidths.length; i++) {
-                if (typeof (this.colWidths[i]) == "string" && this.colWidths[i].indexOf("%") > 0) {
-                    tmpstr += '<col style="width:' + this.colWidths[i] + ';" />\n';
-                } else {
-                    tmpstr += '<col style="width:' + this.colWidths[i] + 'px;" />\n';
-                }
+            for (var i = 0; i < this._widArr.length; i++) {
+                var _wid = 0;
+                tmpstr += '<col style="width:' + this._widArr[i] + 'px;" />\n';
             }
             colgroup.html(tmpstr);
             var tbody = $('<tbody></tbody>').appendTo(table);
@@ -506,9 +536,89 @@
             })
             return orders;
         }
+        //记录调整列宽的记录鼠标位置
+        this._sizex = 0;
+        this._sizecol1 = null;
+        this._sizecol2 = null;
+        this._sizeDown = function (evt) {
+            var size = $(this);
+            var hei = _this.target.height();
+            var offset = size.offset();
+            _this.target_split.css({
+                left: offset.left + "px",
+                top: 0
+            }).height(hei).show();
+            _this._sizex = evt.pageX;
+            $(document.body).bind("mousemove", _this._sizeMove).bind("mouseup", _this._sizeUp);
+            $(document.body).attr("onselectstart", 'return false');
+            //根据当前所在单元格的偏移量计算属于哪个列
+            var th = size.parent().parent();
+            var l = th.offset().left + _this.target_body.scrollLeft();
+            var index = 0;
+            if (l > 0) {
+                var cols = _this.target_header.find("col");
+                var wid = _this.target_body.find(">table").width();
+                var dw = 0;
+                var index = 0;
+                for (var i = 0; i < cols.length; i++) {
+                    var width = cols.eq(i).css("width");
+                    if (width.indexOf("%") > 0) {
+                        width = wid * window.parseFloat(width) / 100;
+                    } else {
+                        width = window.parseInt(width);
+                    }
+                    dw += width;
+                    if (Math.abs(dw - l) < 5) {
+                        index = i + 1;
+                        break;
+                    }
+                }
+            }
+            _this._sizecol1 = _this.target_header.find("col").eq(index);
+            _this._sizecol2 = _this.target_body.find("col").eq(index);
+        }
+        this._sizeMove = function (evt) {
+            var dx = evt.pageX - _this._sizex;
+            var left = window.parseInt(_this.target_split.css("left")) + dx;
+            _this.target_split.css({
+                left: left + "px"
+            });
+            _this._sizex = evt.pageX;
+            var widt = _this._sizecol1.width() + dx;
+            //宽度不能小于10像素
+            if (widt <= 10) return;
+            var sw = _this.target_body.width() - _this.target_body.find(">table").width();
+            if (dx < 0 && sw == 16) {
+                _this._sizecol1.width(widt - 1 + "px");
+                _this._sizecol2.width(widt - 1 + "px");
+            } else if (dx < 0 && sw == 17) {
+                _this._sizecol1.width(widt + "px");
+                _this._sizecol2.width(widt + "px");
+                //如果是缩小并且没有滚动条,此时要将减少的宽度加到后面的col上去
+                var col = _this._sizecol1.next();
+                if (col.length == 0) {
+                    col = _this._sizecol1.prev();
+                }
+                col.width(window.parseInt(col.width()) + (-dx));
+                col = _this._sizecol2.next();
+                if (col.length == 0) {
+                    col = _this._sizecol2.prev();
+                }
+                col.width(window.parseInt(col.width()) + (-dx));
+            } else {
+                _this._sizecol1.width(widt + "px");
+                _this._sizecol2.width(widt + "px");
+            }
+        }
+        this._sizeUp = function () {
+            _this.target_split.hide();
+            $(document.body).unbind("mousemove", _this._sizeMove).unbind("mouseup", _this._sizeUp);
+            $(document.body).removeAttr("onselectstart");
+        }
     }
     Grid.settings = {
         ele: "grid",//表格空间所在的容器的id
+        sizeColumn: false,//是否可调整列宽
         isPage: true,//是否分页
         isFixHead: false,//是否固定列表头
         height: 450,

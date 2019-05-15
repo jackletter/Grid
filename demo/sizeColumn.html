@@ -3,20 +3,26 @@
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>表格排序</title>
+    <title>调整列宽</title>
     <link href="../dist/css/grid.css" rel="stylesheet" />
     <script src="../dist/js/jquery-3.3.1.js"></script>
     <script src="../dist/js/grid.js"></script>
+    <style>
+        td,
+        th {
+            border: 1px solid #333 !important;
+        }
+    </style>
 </head>
 
 <body>
-    <div id="grid" style="width:800px;"></div>
+    <div id="grid" style="width:1000px;"></div>
     <script type="text/javascript">
         var grid;
         $(function () {
             grid = new Grid("grid", {
-                sizeColumn: true,
                 isPage: false,
+                sizeColumn: true,
                 colWidths: [
                     100, 100, 100, 100, 100, 100, 100, 100, 100
                 ],
@@ -27,13 +33,13 @@
                         { text: "扩展信息", colspan: 5 }
                     ],
                     [
-                        { text: "姓名", order: { type: "none", name: "uname", rank: 2 } },
-                        { text: "年龄", order: { type: "asc", name: "uage", rank: 1 } },
+                        { text: "姓名" },
+                        { text: "年龄" },
                         { text: "性别" },
                         { text: "职业" },
                         { text: "身份证号" },
                         { text: "户籍地址" },
-                        { text: "出生日期", order: { type: "asc", name: "ubirth", rank: 3 } },
+                        { text: "出生日期" },
                         { text: "住址" }
                     ]
                 ],
@@ -47,8 +53,7 @@
                     { type: "lab", name: "uplace" },
                     { type: "lab", name: "ubirth" },
                     { type: "lab", name: "uaddr" }
-                ],
-                onQuery: query
+                ]
             });
             grid.init({ data: data });
         });
@@ -64,10 +69,6 @@
             { uname: "小明", uage: 20, usex: "男", uprof: "学生", uidentity: "342510199612146325", uplace: "湖南省湘潭县", ubirth: "1996-12-14", uaddr: "湖北省武汉市汤逊湖社区" },
             { uname: "小明", uage: 20, usex: "男", uprof: "学生", uidentity: "342510199612146325", uplace: "湖南省湘潭县", ubirth: "1996-12-14", uaddr: "湖北省武汉市汤逊湖社区" }
         ];
-        function query(pageIndex, pageSize, orders) {
-            console.log(pageIndex, pageSize, orders);
-            grid.init({ data: data })
-        }
     </script>
 </body>
 
