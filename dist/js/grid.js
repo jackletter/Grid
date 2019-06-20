@@ -10,6 +10,9 @@
         this._widArr = [];//记录计算后的每列宽度
         if (target.length == 0) throw new Error("无效的容器id!");
         $.extend(this, Grid.settings, conf);
+		if (this.pageSizeList && this.pageSizeList.length > 0) {
+            this.pageSize = this.pageSizeList[0];
+        }
         this.init = function (res) {
             target.html("");
             target.addClass("grid");
@@ -442,7 +445,7 @@
                     $('<span class="page-next" title="下一页" data-page="next"></span>').appendTo(div).click(this._onPageChange);
                     $('<span class="page-last" title="尾页" data-page="last"></span>').appendTo(div).click(this._onPageChange);
                 }
-                var currentIndex = (this.pageIndex - 1) * this.pageIndex + 1;
+                var currentIndex = (this.pageIndex - 1) * this.pageSize + 1;
                 div.append('<span class="separator"></span><span style="margin: 5px;">当前显示第' + (currentIndex < 0 ? 0 : currentIndex) + '条到第' + ((currentIndex + res.data.length - 1) < 0 ? 0 : (currentIndex + res.data.length - 1)) + '条数据,共' + res.count + '条</span>');
             }
         }
