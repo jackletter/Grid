@@ -10,7 +10,7 @@
         this._widArr = [];//记录计算后的每列宽度
         if (target.length == 0) throw new Error("无效的容器id!");
         $.extend(this, Grid.settings, conf);
-		if (this.pageSizeList && this.pageSizeList.length > 0) {
+        if (this.pageSizeList && this.pageSizeList.length > 0) {
             this.pageSize = this.pageSizeList[0];
         }
         this.init = function (res) {
@@ -99,30 +99,15 @@
                 }
             }
         }
-        this._initBody = function (res) {
-            _this.target_body = $('<div class="grid-body"></div>').appendTo(target);
-            if (_this.isFixHead) {
-                if (!_this.height) throw new Error("固定表格头时必须指定高度!");
-                var hei = _this.height - _this.target_header.height();
-                _this.target_body.css("height", hei + "px");
+        this._addRows = function (rows) {
+            var tbody = _this.target_body.find("tbody");
+            tbody.find("tr.grid-no-data").remove();
+            var indexs = tbody.find("td[data-row-index]");
+            var rowindex = 0;
+            if (indexs.length > 0) {
+                rowindex = window.parseInt(indexs.eq([indexs.length - 1]).attr("data-row-index"));
             }
-            _this.target_body.scroll(function (e) {
-                _this.target_header.scrollLeft(e.target.scrollLeft);
-            });
-            var table = $('<table></table>').appendTo(_this.target_body);
-            var colgroup = $('<colgroup></colgroup>').appendTo(table);
-            var tmpstr = "";
-            for (var i = 0; i < this._widArr.length; i++) {
-                var _wid = 0;
-                tmpstr += '<col style="width:' + this._widArr[i] + 'px;" />\n';
-            }
-            colgroup.html(tmpstr);
-            var tbody = $('<tbody></tbody>').appendTo(table);
-            if (res.data.length == 0) {
-                //没有数据时插入提示行
-                var tr = $('<tr class="grid-no-data"><td colspan="' + this.columnArr.length + '">没有数据</td></tr>').appendTo(tbody);
-                return;
-            }
+            var res = { data: rows };
             for (var i = 0; i < res.data.length; i++) {
                 var item = res.data[i];
                 var tr = $('<tr rowIndex="' + i + '"></tr>').appendTo(tbody);
@@ -155,7 +140,8 @@
                     var tdconf = this.columnArr[j];
                     switch (this.columnArr[j].type) {
                         case "index": {
-                            $('<span">' + (i + 1) + '</span>').appendTo(div);
+                            $('<span">' + (i + 1 + rowindex) + '</span>').appendTo(div);
+                            td.attr("data-row-index", (i + 1 + rowindex));
                         }
                         case "lab":
                             {
@@ -267,6 +253,36 @@
                             }
                             break;
                         }
+                        case "input": {
+                            var tdtext;
+                            if (typeof (tdconf.formatter) == "function") {
+                                tdtext = tdconf.formatter(item, tdconf);
+                            } else if (tdconf.name) {
+                                tdtext = item[tdconf.name];
+                            }
+                            var titleTxt = "";//提示文本
+                            if (tdconf.title) {//动态的ttitle
+                                titleTxt = item[tdconf.title];
+                            }
+                            if (tdconf.titleText) {//强制的title,优先级高
+                                titleTxt = tdconf.titleText;
+                            }
+                            var input = $("<input class='grid-input' />").appendTo(div);
+                            if (tdtext) {
+                                input.val(tdtext);
+                            }
+                            input.attr("title", titleTxt);
+
+                            if (tdconf.input) {
+                                input.on("input", (function (tdconf, item) {
+                                    return function () {
+                                        var val = $(this).val();
+                                        tdconf.input.apply(this, [val, item]);
+                                    }
+                                })(tdconf, item));
+                            }
+                            break;
+                        }
                         case "btnGroup": {
                             $(tdconf.btns).each(function (i, btnItem) {
                                 //首先处理格式化函数,和格式化参数
@@ -360,6 +376,32 @@
                 }
             }
         }
+        this._initBody = function (res) {
+            _this.target_body = $('<div class="grid-body"></div>').appendTo(target);
+            if (_this.isFixHead) {
+                if (!_this.height) throw new Error("固定表格头时必须指定高度!");
+                var hei = _this.height - _this.target_header.height();
+                _this.target_body.css("height", hei + "px");
+            }
+            _this.target_body.scroll(function (e) {
+                _this.target_header.scrollLeft(e.target.scrollLeft);
+            });
+            var table = $('<table></table>').appendTo(_this.target_body);
+            var colgroup = $('<colgroup></colgroup>').appendTo(table);
+            var tmpstr = "";
+            for (var i = 0; i < this._widArr.length; i++) {
+                var _wid = 0;
+                tmpstr += '<col style="width:' + this._widArr[i] + 'px;" />\n';
+            }
+            colgroup.html(tmpstr);
+            var tbody = $('<tbody></tbody>').appendTo(table);
+            if (res.data.length == 0) {
+                //没有数据时插入提示行
+                var tr = $('<tr class="grid-no-data"><td colspan="' + this.columnArr.length + '">没有数据</td></tr>').appendTo(tbody);
+                return;
+            }
+            this._addRows(res.data);
+        }
         this._editClick = function () {
             var tr = $(this).parentsUntil("tbody", "tr");
             var tds = tr.children("[data-edit=true]");
@@ -452,6 +494,7 @@
         this.mergeRow = function () {
 
         }
+        ////获取选中的行数据
         this.getSelectedRows = function () {
             var trs = _this.target_body.find("tr.grid-select-row");
             var data = [];
@@ -460,6 +503,16 @@
                 trs: trs,
                 data: data
             };
+        }
+        //添加一行
+        this.addRows = function (rows) {
+            if (!rows) return;
+            if (!Array.isArray(rows)) {
+                rows = [rows];
+            }
+            if (rows.length > 0) {
+                this._addRows(rows);
+            }
         }
         this._onPageChange = function () {
             var page = $(this).attr("data-page");

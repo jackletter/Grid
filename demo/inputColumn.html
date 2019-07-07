@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>输入列</title>
+    <link href="../dist/css/grid.css" rel="stylesheet" />
+    <script src="../dist/js/jquery-3.3.1.js"></script>
+    <script src="../dist/js/grid.js"></script>
+</head>
+
+<body>
+    <div id="grid" style="width:800px;"></div>
+    <script type="text/javascript">
+        $(function () {
+            var grid = new Grid("grid", {
+                isPage: false,
+                colWidths: [
+                    100, 100, 100, 100, 100, 100, 100, 100, 100
+                ],
+                headArr: [
+                    [
+                        { text: "序号", rowspan: 2 },
+                        { text: "基本信息", colspan: 3 },
+                        { text: "扩展信息", colspan: 5 }
+                    ],
+                    [
+                        { text: "姓名" },
+                        { text: "年龄" },
+                        { text: "性别" },
+                        { text: "职业" },
+                        { text: "身份证号" },
+                        { text: "户籍地址" },
+                        { text: "出生日期" },
+                        { text: "住址" }
+                    ]
+                ],
+                columnArr: [
+                    { type: "index" },
+                    {
+                        type: "input", name: "uname", input: function () {
+                            console.log(arguments);
+                        }
+                    },
+                    { type: "lab", name: "uage" },
+                    { type: "lab", name: "usex" },
+                    { type: "lab", name: "uprof" },
+                    { type: "lab", name: "uidentity" },
+                    { type: "lab", name: "uplace" },
+                    { type: "lab", name: "ubirth" },
+                    { type: "lab", name: "uaddr" }
+                ]
+            });
+            grid.init({ data: data });
+        });
+        var data = [
+            { uname: "小明", uage: 20, usex: "男", uprof: "学生", uidentity: "342510199612146325", uplace: "湖南省湘潭县", ubirth: "1996-12-14", uaddr: "湖北省武汉市汤逊湖社区" },
+            { uname: "小明", uage: 20, usex: "男", uprof: "学生", uidentity: "342510199612146325", uplace: "湖南省湘潭县", ubirth: "1996-12-14", uaddr: "湖北省武汉市汤逊湖社区" },
+            { uname: "小明", uage: 20, usex: "男", uprof: "学生", uidentity: "342510199612146325", uplace: "湖南省湘潭县", ubirth: "1996-12-14", uaddr: "湖北省武汉市汤逊湖社区" },
+            { uname: "小明", uage: 20, usex: "男", uprof: "学生", uidentity: "342510199612146325", uplace: "湖南省湘潭县", ubirth: "1996-12-14", uaddr: "湖北省武汉市汤逊湖社区" },
+            { uname: "小明", uage: 20, usex: "男", uprof: "学生", uidentity: "342510199612146325", uplace: "湖南省湘潭县", ubirth: "1996-12-14", uaddr: "湖北省武汉市汤逊湖社区" },
+            { uname: "小明", uage: 20, usex: "男", uprof: "学生", uidentity: "342510199612146325", uplace: "湖南省湘潭县", ubirth: "1996-12-14", uaddr: "湖北省武汉市汤逊湖社区" },
+            { uname: "小明", uage: 20, usex: "男", uprof: "学生", uidentity: "342510199612146325", uplace: "湖南省湘潭县", ubirth: "1996-12-14", uaddr: "湖北省武汉市汤逊湖社区" },
+            { uname: "小明", uage: 20, usex: "男", uprof: "学生", uidentity: "342510199612146325", uplace: "湖南省湘潭县", ubirth: "1996-12-14", uaddr: "湖北省武汉市汤逊湖社区" },
+            { uname: "小明", uage: 20, usex: "男", uprof: "学生", uidentity: "342510199612146325", uplace: "湖南省湘潭县", ubirth: "1996-12-14", uaddr: "湖北省武汉市汤逊湖社区" },
+            { uname: "小明", uage: 20, usex: "男", uprof: "学生", uidentity: "342510199612146325", uplace: "湖南省湘潭县", ubirth: "1996-12-14", uaddr: "湖北省武汉市汤逊湖社区" }
+        ];
+    </script>
+</body>
+
+</html>
