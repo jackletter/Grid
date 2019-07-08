@@ -99,16 +99,283 @@
                 }
             }
         }
+        this._delColTypes = {};
+        /*
+        paras:{
+            tbody: tbody,
+            tr: tr,
+            td: td,
+            tdconf:tdconf,
+            div: div,
+            rowindex: rowindex,
+            item:item
+        }
+        */
+        this._delColTypes.index = function (paras) {
+            $('<span">' + (paras.rowindex) + '</span>').appendTo(paras.div);
+            paras.td.attr("data-row-index", (paras.rowindex));
+        }
+        this._delColTypes.lab = function (paras) {
+            var tdconf = paras.tdconf;
+            var div = paras.div;
+            var td = paras.td;
+            var item = paras.item;
+
+            var tdtext, titleTxt, canHide;
+            var b = true;//是否显示内容
+            if (tdconf.isHideKey != undefined) {
+                b = !item[tdconf.isHideKey];
+            }
+            if (!b) return;
+            if (this.isEdit && tdconf.edit) {
+                canHide = true;
+            } else { canHide = false }
+            if (typeof (tdconf.formatter) == "function") {
+                tdtext = tdconf.formatter(item, tdconf);
+            } else if (canHide && tdconf.edit.type == "select") {
+                for (var h = 0; h < tdconf.edit.options.length; h++) {
+                    if (tdconf.edit.options[h].value == item[tdconf.name]) {
+                        tdtext = tdconf.edit.options[h].text;
+                        break;
+                    }
+                }
+            } else {
+                tdtext = item[tdconf.name];
+            }
+            if (tdconf.title) {//动态的ttitle
+                titleTxt = item[tdconf.title];
+            }
+            if (tdconf.titleText) {//强制的title,优先级高
+                titleTxt = tdconf.titleText;
+            }
+            //内容超过最大长度截取
+            if (tdconf.cutLen != undefined) {
+                tdtext = tdtext || "";
+                if (tdtext.length > tdconf.cutLen) {
+                    tdtext = (tdtext || "").substr(0, tdconf.cutLen) + "...";
+                }
+            }
+            if (tdconf.click) {
+                var a = $('<a href="javascript:void(0);"></a>').appendTo(div);
+                a.html(tdtext).attr("data-name", tdconf.name).attr("data-value", item[tdconf.name]).attr("title", "titleTxt");
+                a.click((function (tdconf, tdtext, item) {
+                    return function () {
+                        tdconf.click.apply(this, [tdtext, item]);
+                    }
+                })(tdconf, tdtext, item));
+                if (canHide) {
+                    a.attr("canHide", "true");
+                }
+            } else {
+                var span = $('<span></span>').appendTo(div);
+                span.html(tdtext).attr("data-name", tdconf.name).attr("data-value", item[tdconf.name]).attr("title", titleTxt);
+                if (canHide) {
+                    span.attr("canHide", "true");
+                }
+            }
+            if (canHide) {
+                var _type = tdconf.edit.type || "text";
+                var input;
+                if (_type == "text") {
+                    input = $('<input style="display:none" dataName="' + tdconf.name + '" />').appendTo(div);
+                    input.val(tdtext);
+                } else if (_type == "select") {
+                    if (!tdconf.edit.options) throw new Error("当单元格编辑类型为下拉框时必须指定options参数!");
+                    var str = '<select style="display:none">';
+                    if (tdconf.edit.nullable) {
+                        str += '<option value="">--请选择--</option>';
+                    }
+                    for (var h = 0; h < tdconf.edit.options.length; h++) {
+                        str += '<option value="' + tdconf.edit.options[h].value + '">' + tdconf.edit.options[h].text + '</option>';
+                    }
+                    str += "</select>";
+                    input = $(str).appendTo(div);
+                    input.val(tdtext);
+                }
+                if (tdconf.edit.attr) {
+                    for (var m in tdconf.edit.attr) {
+                        input.attr(m, tdconf.edit.attr[m]);
+                    }
+                }
+                td.attr("data-edit", "true");
+            }
+        }
+        this._delColTypes.img = function (paras) {
+            var tdconf = paras.tdconf;
+            var div = paras.div;
+            var td = paras.td;
+            var item = paras.item;
+
+            //首先处理格式化图片地址函数
+            var srcpath = item[tdconf.src];
+            if (typeof (tdconf.formatter) == "function") {
+                srcpath = tdconf.formatter(item, tdconf);
+            } else if (tdconf.name) {
+                srcpath = item[tdconf.name];
+            }
+            var titleTxt = "";//提示文本
+            if (tdconf.title) {//动态的ttitle
+                titleTxt = item[tdconf.title];
+            }
+            if (tdconf.titleText) {//强制的title,优先级高
+                titleTxt = tdconf.titleText;
+            }
+            var img = $("<img src='" + srcpath + "' />").appendTo(div);
+            img.attr("title", titleTxt);
+
+            if (tdconf.click) {
+                img.css("cursor", "pointer");
+                img.click((function (tdconf, srcpath, item) {
+                    return function () {
+                        tdconf.click.apply(this, [srcpath, item]);
+                    }
+                })(tdconf, srcpath, item));
+            }
+        }
+        this._delColTypes.input = function (paras) {
+            var tdconf = paras.tdconf;
+            var div = paras.div;
+            var td = paras.td;
+            var item = paras.item;
+
+            var tdtext;
+            if (typeof (tdconf.formatter) == "function") {
+                tdtext = tdconf.formatter(item, tdconf);
+            } else if (tdconf.name) {
+                tdtext = item[tdconf.name];
+            }
+            var titleTxt = "";//提示文本
+            if (tdconf.title) {//动态的ttitle
+                titleTxt = item[tdconf.title];
+            }
+            if (tdconf.titleText) {//强制的title,优先级高
+                titleTxt = tdconf.titleText;
+            }
+            var input = $("<input class='grid-input' />").appendTo(div);
+            if (tdtext) {
+                input.val(tdtext);
+            }
+            input.attr("title", titleTxt);
+
+            if (tdconf.input) {
+                input.on("input", (function (tdconf, item) {
+                    return function () {
+                        var val = $(this).val();
+                        tdconf.input.apply(this, [val, item]);
+                    }
+                })(tdconf, item));
+            }
+        }
+        this._delColTypes.btnGroup = function (paras) {
+            var tdconf = paras.tdconf;
+            var div = paras.div;
+            var td = paras.td;
+            var item = paras.item;
+            $(tdconf.btns).each(function (i, btnItem) {
+                //首先处理格式化函数,和格式化参数
+                var btnText = item[btnItem.name];
+                if (typeof (btnItem.formatter) == "function") {
+                    btnText = btnItem.formatter(item, btnItem);
+                } else {
+                    btnText = item[btnItem.name];
+                }
+                if (btnItem.text) {//对于按钮组中的按钮text属性优先级高于name属性
+                    btnText = btnItem.text;
+                }
+                if (i > 0) {
+                    div.append("&nbsp;&nbsp;");
+                }
+                var a = $("<a href='javascript:void(0)'></a>").html(btnText).appendTo(div);
+                a.click((function (btnItem, btnText, item) {
+                    return function () {
+                        btnItem.click.apply(this, [btnText, item]);
+                    }
+                })(btnItem, btnText, item));
+            });
+        }
+        this._delColTypes.btnEdit = function (paras) {
+            var tdconf = paras.tdconf;
+            var div = paras.div;
+            var td = paras.td;
+            var item = paras.item;
+
+            var a_edit = $("<a href='javascript:void(0)' btnFlag='__edit'>编辑</a>").appendTo(div);
+            div.append("&nbsp;&nbsp;");
+            var a_delete = $("<a href='javascript:void(0)' btnFlag='__delete'>删除</a>").appendTo(div);
+            var a_update = $("<a href='javascript:void(0)' btnFlag='__update'>更新</a>").hide().appendTo(div);
+            div.append("&nbsp;&nbsp;");
+            var a_cancel = $("<a href='javascript:void(0)' btnFlag='__cancel'>取消</a>").hide().appendTo(div);
+            a_edit.click(_this._editClick);
+            a_delete.click(_this._deleteClick);
+            a_update.click(_this._updateClick);
+            a_cancel.click(_this._cancelClick);
+        }
+        this._delColTypes.chk = function (paras) {
+            var tdconf = paras.tdconf;
+            var div = paras.div;
+            var td = paras.td;
+            var item = paras.item;
+
+            var titleTxt = "";
+            if (tdconf.title) {//动态的ttitle
+                titleTxt = item[tdconf.title];
+            }
+            if (tdconf.titleText) {//强制的title,优先级高
+                titleTxt = tdconf.titleText;
+            }
+            var chk = $("<div class='grid-checkbox' />").appendTo(div);
+            chk.attr("title", titleTxt);
+            chk.click((function (tdconf, item) {
+                return function () {
+                    $(this).toggleClass("grid-checked");
+                    if (tdconf.selectRow) {
+                        if ($(this).hasClass("grid-checked")) {
+                            $(this).parentsUntil("tbody", "tr").addClass("grid-select-row");
+                            if (tdconf.click) {
+                                tdconf.click.apply(this, [true, item]);
+                            }
+                        } else {
+                            $(this).parentsUntil("tbody", "tr").removeClass("grid-select-row");
+                            if (tdconf.click) {
+                                tdconf.click.apply(this, [false, item]);
+                            }
+                        }
+                    }
+                }
+            })(tdconf, item));
+        }
+        this._delColTypes.other = function (paras) {
+            var tdconf = paras.tdconf;
+            var div = paras.div;
+            var td = paras.td;
+            var item = paras.item;
+
+            if (!tdconf.formatter) throw new Error("类型为other的列必须指定formmter函数!");
+            var _res = tdconf.formatter(item, tdconf);
+            if (typeof (_res) == "string") {
+                _res = $(_res);
+            }
+            div.replaceWith(_res);
+        }
         this._addRows = function (rows) {
             var tbody = _this.target_body.find("tbody");
             tbody.find("tr.grid-no-data").remove();
             var indexs = tbody.find("td[data-row-index]");
             var rowindex = 0;
             if (indexs.length > 0) {
-                rowindex = window.parseInt(indexs.eq([indexs.length - 1]).attr("data-row-index"));
+                rowindex += window.parseInt(indexs.eq([indexs.length - 1]).attr("data-row-index"));
+            } else if (this.isPage) {
+                var base = window.parseInt((this.pageIndex - 1) * this.pageSize);
+                if (isNaN(base)) {
+                    throw new Error("算行号时出错");
+                } else {
+                    rowindex += base;
+                }
             }
+
             var res = { data: rows };
             for (var i = 0; i < res.data.length; i++) {
+                rowindex++;
                 var item = res.data[i];
                 var tr = $('<tr rowIndex="' + i + '"></tr>').appendTo(tbody);
                 tr.click(function () {
@@ -138,245 +405,26 @@
                     var div = $('<div></div>').appendTo(td);
 
                     var tdconf = this.columnArr[j];
-                    switch (this.columnArr[j].type) {
-                        case "index": {
-                            $('<span">' + (i + 1 + rowindex) + '</span>').appendTo(div);
-                            td.attr("data-row-index", (i + 1 + rowindex));
-                        }
-                        case "lab":
-                            {
-                                var tdtext, titleTxt, canHide;
-                                var b = true;//是否显示内容
-                                if (tdconf.isHideKey != undefined) {
-                                    b = !item[tdconf.isHideKey];
-                                }
-                                if (!b) continue;
-                                if (this.isEdit && tdconf.edit) {
-                                    canHide = true;
-                                } else { canHide = false }
-                                if (typeof (tdconf.formatter) == "function") {
-                                    tdtext = tdconf.formatter(item, tdconf);
-                                } else if (canHide && tdconf.edit.type == "select") {
-                                    for (var h = 0; h < tdconf.edit.options.length; h++) {
-                                        if (tdconf.edit.options[h].value == item[tdconf.name]) {
-                                            tdtext = tdconf.edit.options[h].text;
-                                            break;
-                                        }
-                                    }
-                                } else {
-                                    tdtext = item[tdconf.name];
-                                }
-                                if (tdconf.title) {//动态的ttitle
-                                    titleTxt = item[tdconf.title];
-                                }
-                                if (tdconf.titleText) {//强制的title,优先级高
-                                    titleTxt = tdconf.titleText;
-                                }
-                                //内容超过最大长度截取
-                                if (tdconf.cutLen != undefined) {
-                                    tdtext = tdtext || "";
-                                    if (tdtext.length > tdconf.cutLen) {
-                                        tdtext = (tdtext || "").substr(0, tdconf.cutLen) + "...";
-                                    }
-                                }
-                                if (tdconf.click) {
-                                    var a = $('<a href="javascript:void(0);"></a>').appendTo(div);
-                                    a.html(tdtext).attr("data-name", tdconf.name).attr("data-value", item[tdconf.name]).attr("title", "titleTxt");
-                                    a.click((function (tdconf, tdtext, item) {
-                                        return function () {
-                                            tdconf.click.apply(this, [tdtext, item]);
-                                        }
-                                    })(tdconf, tdtext, item));
-                                    if (canHide) {
-                                        a.attr("canHide", "true");
-                                    }
-                                } else {
-                                    var span = $('<span></span>').appendTo(div);
-                                    span.html(tdtext).attr("data-name", tdconf.name).attr("data-value", item[tdconf.name]).attr("title", titleTxt);
-                                    if (canHide) {
-                                        span.attr("canHide", "true");
-                                    }
-                                }
-                                if (canHide) {
-                                    var _type = tdconf.edit.type || "text";
-                                    var input;
-                                    if (_type == "text") {
-                                        input = $('<input style="display:none" dataName="' + tdconf.name + '" />').appendTo(div);
-                                        input.val(tdtext);
-                                    } else if (_type == "select") {
-                                        if (!tdconf.edit.options) throw new Error("当单元格编辑类型为下拉框时必须指定options参数!");
-                                        var str = '<select style="display:none">';
-                                        if (tdconf.edit.nullable) {
-                                            str += '<option value="">--请选择--</option>';
-                                        }
-                                        for (var h = 0; h < tdconf.edit.options.length; h++) {
-                                            str += '<option value="' + tdconf.edit.options[h].value + '">' + tdconf.edit.options[h].text + '</option>';
-                                        }
-                                        str += "</select>";
-                                        input = $(str).appendTo(div);
-                                        input.val(tdtext);
-                                    }
-                                    if (tdconf.edit.attr) {
-                                        for (var m in tdconf.edit.attr) {
-                                            input.attr(m, tdconf.edit.attr[m]);
-                                        }
-                                    }
-                                    td.attr("data-edit", "true");
-                                }
-                                break;
-                            }
-                        case "img": {
-                            //首先处理格式化图片地址函数
-                            var srcpath = item[tdconf.src];
-                            if (typeof (tdconf.formatter) == "function") {
-                                srcpath = tdconf.formatter(item, tdconf);
-                            } else if (tdconf.name) {
-                                srcpath = item[tdconf.name];
-                            }
-                            var titleTxt = "";//提示文本
-                            if (tdconf.title) {//动态的ttitle
-                                titleTxt = item[tdconf.title];
-                            }
-                            if (tdconf.titleText) {//强制的title,优先级高
-                                titleTxt = tdconf.titleText;
-                            }
-                            var img = $("<img src='" + srcpath + "' />").appendTo(div);
-                            img.attr("title", titleTxt);
-
-                            if (tdconf.click) {
-                                img.css("cursor", "pointer");
-                                img.click((function (tdconf, srcpath, item) {
-                                    return function () {
-                                        tdconf.click.apply(this, [srcpath, item]);
-                                    }
-                                })(tdconf, srcpath, item));
-                            }
-                            break;
-                        }
-                        case "input": {
-                            var tdtext;
-                            if (typeof (tdconf.formatter) == "function") {
-                                tdtext = tdconf.formatter(item, tdconf);
-                            } else if (tdconf.name) {
-                                tdtext = item[tdconf.name];
-                            }
-                            var titleTxt = "";//提示文本
-                            if (tdconf.title) {//动态的ttitle
-                                titleTxt = item[tdconf.title];
-                            }
-                            if (tdconf.titleText) {//强制的title,优先级高
-                                titleTxt = tdconf.titleText;
-                            }
-                            var input = $("<input class='grid-input' />").appendTo(div);
-                            if (tdtext) {
-                                input.val(tdtext);
-                            }
-                            input.attr("title", titleTxt);
-
-                            if (tdconf.input) {
-                                input.on("input", (function (tdconf, item) {
-                                    return function () {
-                                        var val = $(this).val();
-                                        tdconf.input.apply(this, [val, item]);
-                                    }
-                                })(tdconf, item));
-                            }
-                            break;
-                        }
-                        case "btnGroup": {
-                            $(tdconf.btns).each(function (i, btnItem) {
-                                //首先处理格式化函数,和格式化参数
-                                var btnText = item[btnItem.name];
-                                if (typeof (btnItem.formatter) == "function") {
-                                    btnText = btnItem.formatter(item, btnItem);
-                                } else {
-                                    btnText = item[btnItem.name];
-                                }
-                                if (btnItem.text) {//对于按钮组中的按钮text属性优先级高于name属性
-                                    btnText = btnItem.text;
-                                }
-                                if (i > 0) {
-                                    div.append("&nbsp;&nbsp;");
-                                }
-                                var a = $("<a href='javascript:void(0)'></a>").html(btnText).appendTo(div);
-                                a.click((function (btnItem, btnText, item) {
-                                    return function () {
-                                        btnItem.click.apply(this, [btnText, item]);
-                                    }
-                                })(btnItem, btnText, item));
-                            });
-                            break;
-                        }
-                        case "btnEdit": {
-                            var a_edit = $("<a href='javascript:void(0)' btnFlag='__edit'>编辑</a>").appendTo(div);
-                            div.append("&nbsp;&nbsp;");
-                            var a_delete = $("<a href='javascript:void(0)' btnFlag='__delete'>删除</a>").appendTo(div);
-                            var a_update = $("<a href='javascript:void(0)' btnFlag='__update'>更新</a>").hide().appendTo(div);
-                            div.append("&nbsp;&nbsp;");
-                            var a_cancel = $("<a href='javascript:void(0)' btnFlag='__cancel'>取消</a>").hide().appendTo(div);
-                            a_edit.click(_this._editClick);
-                            a_delete.click(_this._deleteClick);
-                            a_update.click(_this._updateClick);
-                            a_cancel.click(_this._cancelClick);
-                            break;
-                        }
-                        case "chk": {
-                            var titleTxt = "";
-                            if (tdconf.title) {//动态的ttitle
-                                titleTxt = item[tdconf.title];
-                            }
-                            if (tdconf.titleText) {//强制的title,优先级高
-                                titleTxt = tdconf.titleText;
-                            }
-                            var chk = $("<div class='grid-checkbox' />").appendTo(div);
-                            chk.attr("title", titleTxt);
-                            chk.click((function (tdconf, item) {
-                                return function () {
-                                    $(this).toggleClass("grid-checked");
-                                    if (tdconf.selectRow) {
-                                        if ($(this).hasClass("grid-checked")) {
-                                            $(this).parentsUntil("tbody", "tr").addClass("grid-select-row");
-                                            if (tdconf.click) {
-                                                tdconf.click.apply(this, [true, item]);
-                                            }
-                                        } else {
-                                            $(this).parentsUntil("tbody", "tr").removeClass("grid-select-row");
-                                            if (tdconf.click) {
-                                                tdconf.click.apply(this, [false, item]);
-                                            }
-                                        }
-                                    }
-                                }
-                            })(tdconf, item));
-                            break;
-                        }
-                        case "index": {
-                            var ind = i + 1;
-                            if (this.isPage) {
-                                var base = window.parseInt(this.pageIndex * this.pageCount);
-                                if (isNaN(base)) {
-                                    console.error("算行号时出错");
-                                } else {
-                                    ind += base;
-                                }
-                            }
-                            $("<span>" + ind + "</span>").appendTo(div);
-                            break;
-                        }
-                        case "other": {
-                            if (!tdconf.formatter) throw new Error("类型为other的列必须指定formmter函数!");
-                            var _res = tdconf.formatter(item, tdconf);
-                            if (typeof (_res) == "string") {
-                                _res = $(_res);
-                            }
-                            div.replaceWith(_res);
-                            break;
-                        }
+                    if (typeof (this._delColTypes[this.columnArr[j].type]) == "function") {
+                        this._delColTypes[this.columnArr[j].type].apply(_this, [{
+                            tbody: tbody,
+                            tr: tr,
+                            item: item,
+                            td: td,
+                            tdconf: tdconf,
+                            div: div,
+                            rowindex: rowindex
+                        }]);
+                    } else {
+                        throw new Error("未找到列类型:" + this.columnArr[j].type + "的处理函数！");
                     }
                 }
             }
         }
         this._initBody = function (res) {
+            if (this.isPage) {
+                this.pageCount = Math.ceil(res.count / this.pageSize);
+            }
             _this.target_body = $('<div class="grid-body"></div>').appendTo(target);
             if (_this.isFixHead) {
                 if (!_this.height) throw new Error("固定表格头时必须指定高度!");
@@ -504,8 +552,8 @@
                 data: data
             };
         }
-        //添加一行
-        this.addRows = function (rows) {
+        //添加行
+        this.deleteRows = function (rows) {
             if (!rows) return;
             if (!Array.isArray(rows)) {
                 rows = [rows];
