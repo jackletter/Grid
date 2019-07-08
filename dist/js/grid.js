@@ -553,7 +553,7 @@
             };
         }
         //添加行
-        this.deleteRows = function (rows) {
+        this.addRows = function (rows) {
             if (!rows) return;
             if (!Array.isArray(rows)) {
                 rows = [rows];
