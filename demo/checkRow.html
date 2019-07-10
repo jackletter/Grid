@@ -10,24 +10,30 @@
 </head>
 
 <body>
-    <div id="grid" style="width:800px;"></div>
     <div>
         <button onclick="getRow()">获取选中行</button>
+        <button onclick="getAllRow()">获取所有行</button>
     </div>
+    <div id="grid" style="width:800px;"></div>
     <script type="text/javascript">
         var grid;
         $(function () {
             grid = new Grid("grid", {
+                isEdit: true,
                 isPage: false,
+                onUpdate: function (row) {
+                    console.log(row);
+                },
                 colWidths: [
-                    50, 50, 100, 100, 100, 100, 100, 100, 100, 100
+                    50, 50, 100, 100, 100, 100, 100, 100, 100, 100, 150
                 ],
                 headArr: [
                     [
                         { text: "选择", rowspan: 2 },
                         { text: "序号", rowspan: 2 },
                         { text: "基本信息", colspan: 3 },
-                        { text: "扩展信息", colspan: 5 }
+                        { text: "扩展信息", colspan: 5 },
+                        { text: "操作", rowspan: 12 }
                     ],
                     [
                         { text: "姓名" },
@@ -43,14 +49,15 @@
                 columnArr: [
                     { type: "chk", selectRow: true },
                     { type: "index" },
-                    { type: "lab", name: "uname" },
-                    { type: "lab", name: "uage" },
+                    { type: "lab", name: "uname", edit: true },
+                    { type: "input", name: "uage" },
                     { type: "lab", name: "usex" },
                     { type: "lab", name: "uprof" },
                     { type: "lab", name: "uidentity" },
                     { type: "lab", name: "uplace" },
                     { type: "lab", name: "ubirth" },
-                    { type: "lab", name: "uaddr" }
+                    { type: "lab", name: "uaddr" },
+                    { type: "btnEdit" },
                 ]
             });
             grid.init({ data: data });
@@ -69,6 +76,9 @@
         ];
         function getRow() {
             console.log(grid.getSelectedRows());
+        }
+        function getAllRow() {
+            console.log(grid.getAllRows());
         }
     </script>
 </body>

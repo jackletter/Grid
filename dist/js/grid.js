@@ -256,7 +256,12 @@
                 input.val(tdtext);
             }
             input.attr("title", titleTxt);
-
+            input.on("input", (function (tdconf, item) {
+                return function () {
+                    var val = $(this).val();
+                    item[tdconf.name] = val;
+                }
+            })(tdconf, item));
             if (tdconf.input) {
                 input.on("input", (function (tdconf, item) {
                     return function () {
@@ -486,6 +491,9 @@
                 }
             }
             _this.onUpdate(updateData);
+            //更新完之后,要更新行数据和显示
+            data = $.extend(true, {}, updateData);
+            tr.data("rowdata", data);
         }
         this._cancelClick = function () {
             var tr = $(this).parentsUntil("tbody", "tr");
@@ -542,9 +550,19 @@
         this.mergeRow = function () {
 
         }
-        ////获取选中的行数据
+        //获取选中的行数据
         this.getSelectedRows = function () {
             var trs = _this.target_body.find("tr.grid-select-row");
+            var data = [];
+            for (var i = 0; i < trs.length; i++)data.push(trs.eq(i).data("rowdata"));
+            return {
+                trs: trs,
+                data: data
+            };
+        }
+        //获取所有行数据
+        this.getAllRows = function () {
+            var trs = _this.target_body.find("tr:not(.grid-no-data)");
             var data = [];
             for (var i = 0; i < trs.length; i++)data.push(trs.eq(i).data("rowdata"));
             return {
