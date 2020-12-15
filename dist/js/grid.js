@@ -631,11 +631,25 @@
                 $('<div class="grid-sort-item" data-type="asc" />').appendTo(box).html("正序").click(_this._orderClick);
                 $('<div class="grid-sort-item" data-type="desc" />').appendTo(box).html("倒序").click(_this._orderClick);
                 $('<div class="grid-sort-item" data-type="none" />').appendTo(box).html("取消").click(_this._orderClick);
+                var _timeout_order_leave = undefined;
+                function hideOrderBox() {
+                    clearOrderBoxHide();
+                    box.hide();
+                }
+                function showOrderBox() {
+                    clearOrderBoxHide();
+                    box.show();
+                }
+                function clearOrderBoxHide() {
+                    _timeout_order_leave && clearTimeout(_timeout_order_leave);
+                }
                 box.mouseleave(function () {
-                    $(this).hide();
+                    _timeout_order_leave = setTimeout(hideOrderBox, 500);
                 }).click(function () {
-                    $(this).hide();
-                });
+                    hideOrderBox();
+                }).mousemove(function () {
+                    showOrderBox();
+                })
             }
             box.css({
                 top: evt.pageY - 1,
