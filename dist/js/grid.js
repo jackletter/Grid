@@ -13,6 +13,23 @@
         if (this.pageSizeList && this.pageSizeList.length > 0) {
             this.pageSize = this.pageSizeList[0];
         }
+        //针对设定的排序规则对数组中的数据进行排序
+        this.order = function (dataArray, orders) {
+            var orders = orders || this._collectOrders();
+            var datas = dataArray.sort((pre, next) => {
+                for (var i = 0; i < orders.length; i++) {
+                    var order = orders[i];
+                    var preval = pre[order.name];
+                    var nextval = next[order.name];
+                    if (preval > nextval) {
+                        return order.type == "asc" ? 1 : -1;
+                    } else if (preval < nextval) {
+                        return order.type == "asc" ? -1 : 1;
+                    }
+                }
+            });
+            return datas;
+        }
         this.init = function (res) {
             target.html("");
             target.addClass("grid");
@@ -632,8 +649,12 @@
             if (srcType != targetType) {
                 data.order.rank = --_this.rank;
                 data.order.type = $(this).attr("data-type");
-                _this.pageIndex = 1;
-                _this.onQuery(_this.pageIndex, _this.pageSize, _this._sortOrders(_this._collectOrders()));
+                if (_this.isPage) {
+                    _this.pageIndex = 1;
+                    _this.onQuery(_this.pageIndex, _this.pageSize, _this._sortOrders(_this._collectOrders()));
+                } else {
+                    _this.onQuery(-1, -1, _this._sortOrders(_this._collectOrders()));
+                }
             }
         }
         this._collectOrders = function (arr, orders) {
