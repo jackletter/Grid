@@ -61,7 +61,6 @@
     vertical-align: top;
     width: 19px;
     height: 19px;
-    cursor: pointer;
 }
 
 .grid-header th.grid-sort .sort-icon:hover {
@@ -93,7 +92,7 @@
     line-height: 25px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    cursor: pointer;
+    cursor: default;
     font-size: 14px;
     color: #333;
     z-index: 9999;
