@@ -1,4 +1,4 @@
-* {
+﻿* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -152,7 +152,10 @@
     height: 35px;
     overflow: hidden;
     position: relative;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
+
 
 .grid-footer {
     height: 35px;

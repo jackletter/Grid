@@ -191,13 +191,6 @@
         //强制的title,优先级高
         titleTxt = tdconf.titleText;
       }
-      //内容超过最大长度截取
-      if (tdconf.cutLen != undefined) {
-        tdtext = tdtext || "";
-        if (tdtext.length > tdconf.cutLen) {
-          tdtext = (tdtext || "").substr(0, tdconf.cutLen) + "...";
-        }
-      }
       if (tdconf.click) {
         var a = $('<a href="javascript:void(0);"></a>').appendTo(div);
         a
