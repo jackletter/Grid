@@ -538,7 +538,7 @@
       if (this.isPage) {
         this.pageCount = Math.ceil(res.count / this.pageSize);
       }
-      _this.target_body = $('<div class="grid-body"></div>').appendTo(target);
+      _this.target_body = $('<div class="grid-body"></div>').appendTo(target).hide();
       if (_this.isFixHead) {
         if (!_this.height) throw new Error("固定表格头时必须指定高度!");
         var hei = _this.height - _this.target_header.height();
@@ -565,7 +565,10 @@
         ).appendTo(tbody);
         return;
       }
+      console.log("行加载:start: ",new Date().getTime())
       this._addRows(res.data);
+      console.log("行加载:end: ",new Date().getTime());
+      _this.target_body.show();
     };
     this._edit = function (tr) {
       tr.attr("in-edit", "true");
